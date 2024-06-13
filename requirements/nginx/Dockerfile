@@ -1,8 +1,11 @@
 FROM debian:buster
 
 # Update package list and install dependencies
-RUN apt-get update && apt-get install -y nginx openssl \
-    libnginx-mod-security modsecurity-crs && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y nginx openssl git \
+    bison build-essential ca-certificates curl dh-autoreconf doxygen \
+    flex gawk git iputils-ping libcurl4-gnutls-dev libexpat1-dev libgeoip-dev liblmdb-dev \
+    libpcre3-dev libpcre++-dev libssl-dev libtool libxml2 libxml2-dev libyajl-dev locales \
+    lua5.3-dev pkg-config wget zlib1g-dev zlibc libxslt libgd-dev && rm -rf /var/lib/apt/lists/*
 
 # Create directory for SSL certificates
 RUN mkdir -p /etc/nginx/ssl
@@ -18,16 +21,13 @@ COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 COPY ./conf/default.conf /etc/nginx/conf.d/default.conf
 
 # Create directory for web content
-RUN mkdir -p /var/www/wordpress
+RUN mkdir -p /var/www/html
 
-# Ensure ModSecurity is enabled and configure it
-RUN sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/modsecurity/modsecurity.conf
-
-# Include OWASP CRS rules in the Nginx configuration
-RUN echo 'Include "/usr/share/modsecurity-crs/owasp-crs.load"' >> /etc/nginx/modsec/main.conf
+COPY tools/script.sh .
+RUN chmod +x script.sh
 
 # Expose port 443 for HTTPS
 EXPOSE 443
 
 # Start Nginx in the foreground
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+CMD ["bash", "script.sh"]

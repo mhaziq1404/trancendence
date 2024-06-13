@@ -1,13 +1,13 @@
 version: '3.9'
 
-# volumes:
-#   tr:
-#     name: tr
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /home/mmuhamad/data/transcendence
-#       o: bind
+volumes:
+  tr:
+    name: tr
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/mmuhamad/transcendence-data/
+      o: bind
 #   db:
 #     name: db
 #     driver: local
@@ -18,18 +18,18 @@ version: '3.9'
 
 services:
 
-  database:
-    build:
-     context: ./requirements/database
-     dockerfile: Dockerfile
-    container_name: tr-database
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - transcendence
-    volumes:
-      - db:/var/lib/postgresql
+  # database:
+  #   build:
+  #    context: ./requirements/database
+  #    dockerfile: Dockerfile
+  #   container_name: tr-database
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
+  #   networks:
+  #     - transcendence
+  #   volumes:
+  #     - db:/var/lib/postgresql
 
   nginx:
       build:
@@ -41,53 +41,51 @@ services:
       restart: unless-stopped
       networks:
         - transcendence
-      depends_on:
-        - transcendence
       ports:
         - "443:443"
       volumes:
         - tr:/var/www/html/
 
-  adminer:
-    build:
-     context: ./requirements/adminer
-     dockerfile: Dockerfile
-    container_name: tr-adminer
-    env_file:
-      - .env
-    restart: unless-stopped
-    depends_on:
-      - database
-    networks:
-      - transcendence
-    ports:
-      - '5432:5432'
+  # adminer:
+  #   build:
+  #    context: ./requirements/adminer
+  #    dockerfile: Dockerfile
+  #   container_name: tr-adminer
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - database
+  #   networks:
+  #     - transcendence
+  #   ports:
+  #     - '5432:5432'
 
-  vault:
-    build:
-     context: ./requirements/vault
-     dockerfile: Dockerfile
-    container_name: tr-vault
-    env_file:
-      - .env
-    restart: unless-stopped
-    depends_on:
-      - database
-    networks:
-      - transcendence
+  # vault:
+  #   build:
+  #    context: ./requirements/vault
+  #    dockerfile: Dockerfile
+  #   container_name: tr-vault
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - database
+  #   networks:
+  #     - transcendence
 
-  log:
-    build:
-     context: ./requirements/log
-     dockerfile: Dockerfile
-    container_name: tr-log
-    env_file:
-      - .env
-    restart: unless-stopped
-    depends_on:
-      - database
-    networks:
-      - transcendence
+  # log:
+  #   build:
+  #    context: ./requirements/log
+  #    dockerfile: Dockerfile
+  #   container_name: tr-log
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - database
+  #   networks:
+  #     - transcendence
 
 
 networks:
