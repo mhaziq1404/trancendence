@@ -6,7 +6,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/mmuhamad/transcendence-data/
+      device: /home/mmuhamad/transcendence-data
       o: bind
 #   db:
 #     name: db
@@ -41,10 +41,11 @@ services:
       restart: unless-stopped
       networks:
         - transcendence
+      volumes:
+        - tr:/etc/mount
       ports:
         - "443:443"
-      volumes:
-        - tr:/var/www/html/
+        - "80:80"
 
   # adminer:
   #   build:
@@ -61,18 +62,16 @@ services:
   #   ports:
   #     - '5432:5432'
 
-  # vault:
-  #   build:
-  #    context: ./requirements/vault
-  #    dockerfile: Dockerfile
-  #   container_name: tr-vault
-  #   env_file:
-  #     - .env
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - database
-  #   networks:
-  #     - transcendence
+  vault:
+    build:
+     context: ./requirements/vault
+     dockerfile: Dockerfile
+    container_name: tr-vault
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - transcendence
 
   # log:
   #   build:
@@ -92,3 +91,4 @@ networks:
   transcendence:
     name: tr-transcendence
     driver: bridge
+    external: false

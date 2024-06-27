@@ -1,32 +1,21 @@
-FROM debian:buster
+# Use Debian Bookworm Slim as the base image
+FROM debian:bookworm-slim
 
-# Install dependencies
+# Install necessary dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
-    gnupg \
-    lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Vault
-RUN wget https://releases.hashicorp.com/vault/1.10.0/vault_1.10.0_linux_amd64.zip -O /tmp/vault.zip \
-    && unzip /tmp/vault.zip -d /usr/local/bin/ \
-    && rm /tmp/vault.zip
+ENV VAULT_VERSION=1.7.5
+RUN wget https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
+    unzip vault_${VAULT_VERSION}_linux_amd64.zip && \
+    mv vault /usr/local/bin/ && \
+    rm vault_${VAULT_VERSION}_linux_amd64.zip
 
-# Create Vault user and directories
-RUN useradd --system --home /etc/vault.d --shell /bin/false vault \
-    && mkdir --parents /etc/vault.d \
-    && mkdir --parents /opt/vault \
-    && chown --recursive vault:vault /etc/vault.d /opt/vault
-
-# Copy Vault configuration file
-COPY ./vault-config.hcl /etc/vault.d/vault-config.hcl
-RUN chown vault:vault /etc/vault.d/vault-config.hcl
-
-# Expose Vault HTTP port
+# Expose the Vault port
 EXPOSE 8200
 
-# Run Vault
-USER vault
-CMD ["vault", "server", "-config=/etc/vault.d/vault-config.hcl"]
-
+# Run Vault in server mode
+CMD ["vault", "server", "-dev"]
