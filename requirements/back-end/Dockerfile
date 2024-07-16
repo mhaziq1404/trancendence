@@ -2,20 +2,22 @@ FROM debian:bookworm-slim
 
 # Install necessary packages
 RUN apt-get update \
-    && apt-get install -y python3 python3-pip \
+    && apt-get install -y python3 python3-pip python3.11-venv \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir transcendence
-
-RUN files/ transcendence/
-
+# Create and set up the application directory
+RUN mkdir /transcendence
+COPY files/* /transcendence/
 WORKDIR /transcendence
 
+# Create virtual environment
 RUN python3 -m venv myappvenv
 
-RUN source myappvenv/bin/activate
+# Install dependencies
+RUN /bin/bash -c "source myappvenv/bin/activate && pip3 install django psycopg2-binary"
 
-RUN pip3 install django psycopg2-binary
+# Expose the Django development server port
+EXPOSE 8000
 
-# python manage.py runserver
-CMD ["python3", "manage.py", "runserver"]
+# Command to run the server
+CMD ["myappvenv/bin/python3", "manage.py", "runserver", "0.0.0.0:8000"]
