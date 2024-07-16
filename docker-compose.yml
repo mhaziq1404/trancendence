@@ -30,7 +30,8 @@ services:
       - transcendence
     volumes:
       - db:/var/lib/postgresql/data
-  database:
+
+  backend:
     build:
      context: ./requirements/back-end
      dockerfile: Dockerfile
@@ -83,26 +84,26 @@ services:
   #   networks:
   #     - transcendence
 
-  # JWT:
-  #   build:
-  #     context: ./requirements/JWT
-  #     dockerfile: Dockerfile
-  #   container_name: tr-JWT
-  #   # env_file:
-  #   #   - .env
-  #   networks:
-  #     - transcendence
-  #   restart: unless-stopped
-  # 2FA:
-  #   build:
-  #     context: ./requirements/2FA
-  #     dockerfile: Dockerfile
-  #   container_name: tr-2FA
-  #   # env_file:
-  #   #   - .env
-  #   networks:
-  #     - transcendence
-  #   restart: unless-stopped
+  JWT:
+    build:
+      context: ./requirements/JWT
+      dockerfile: Dockerfile
+    container_name: tr-JWT
+    # env_file:
+    #   - .env
+    networks:
+      - transcendence
+    restart: unless-stopped
+  2FA:
+    build:
+      context: ./requirements/2FA
+      dockerfile: Dockerfile
+    container_name: tr-2FA
+    # env_file:
+    #   - .env
+    networks:
+      - transcendence
+    restart: unless-stopped
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.17.1
   #   container_name: elasticsearch
