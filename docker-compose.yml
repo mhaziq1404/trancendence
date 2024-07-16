@@ -84,7 +84,7 @@ services:
   #   networks:
   #     - transcendence
 
-  JWT:
+  jwt:
     build:
       context: ./requirements/JWT
       dockerfile: Dockerfile
@@ -94,7 +94,8 @@ services:
     networks:
       - transcendence
     restart: unless-stopped
-  2FA:
+
+  fa:
     build:
       context: ./requirements/2FA
       dockerfile: Dockerfile
@@ -104,6 +105,7 @@ services:
     networks:
       - transcendence
     restart: unless-stopped
+
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.17.1
   #   container_name: elasticsearch
