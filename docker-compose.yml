@@ -6,46 +6,46 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/mmuhamad/transcendence-data
+      device: /home/mmuhamad/transcendence-data/data
       o: bind
-#   db:
-#     name: db
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /home/mmuhamad/data/db
-#       o: bind
+  db:
+    name: db
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/mmuhamad/transcendence-data/db
+      o: bind
 
 services:
 
-  # database:
-  #   build:
-  #    context: ./requirements/database
-  #    dockerfile: Dockerfile
-  #   container_name: tr-database
-  #   env_file:
-  #     - .env
-  #   restart: unless-stopped
-  #   networks:
-  #     - transcendence
-  #   volumes:
-  #     - db:/var/lib/postgresql
+  database:
+    build:
+     context: ./requirements/database
+     dockerfile: Dockerfile
+    container_name: tr-database
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - transcendence
+    volumes:
+      - db:/var/lib/postgresql/data
 
-  nginx:
-      build:
-        context: ./requirements/nginx
-        dockerfile: Dockerfile
-      container_name: tr-nginx
-      env_file:
-        - .env
-      restart: unless-stopped
-      networks:
-        - transcendence
-      volumes:
-        - tr:/etc/mount
-      ports:
-        - "443:443"
-        - "80:80"
+  # nginx:
+  #     build:
+  #       context: ./requirements/nginx
+  #       dockerfile: Dockerfile
+  #     container_name: tr-nginx
+  #     env_file:
+  #       - .env
+  #     restart: unless-stopped
+  #     networks:
+  #       - transcendence
+  #     volumes:
+  #       - tr:/etc/mount
+  #     ports:
+  #       - "443:443"
+  #       - "80:80"
 
   # adminer:
   #   build:
@@ -73,6 +73,60 @@ services:
     networks:
       - transcendence
 
+  JWT:
+    build:
+      context: ./requirements/JWT
+      dockerfile: Dockerfile
+    container_name: tr-JWT
+    # env_file:
+    #   - .env
+    networks:
+      - transcendence
+    restart: unless-stopped
+  2FA:
+    build:
+      context: ./requirements/2FA
+      dockerfile: Dockerfile
+    container_name: tr-2FA
+    # env_file:
+    #   - .env
+    networks:
+      - transcendence
+    restart: unless-stopped
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - elk
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.1
+    container_name: logstash
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+
   # log:
   #   build:
   #    context: ./requirements/log
@@ -90,5 +144,9 @@ services:
 networks:
   transcendence:
     name: tr-transcendence
+    driver: bridge
+    external: false
+  elk:
+    name: tr-elk
     driver: bridge
     external: false

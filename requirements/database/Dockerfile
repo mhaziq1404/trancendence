@@ -1,16 +1,18 @@
 FROM debian:bookworm-slim
 
-# Install PostgreSQL
-RUN apt-get update && apt-get install -y postgresql postgresql-contrib
+# Install PostgreSQL and other necessary packages
+RUN apt-get update && \
+    apt-get install -y postgresql postgresql-contrib && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Create a directory for initialization scripts
-RUN mkdir -p /docker-entrypoint-initdb.d
+# Set environment variables
+ENV POSTGRES_USER ponguser
+ENV POSTGRES_PASSWORD pongpassword
+ENV POSTGRES_DB pongdb
 
-# Copy your initialization script (if needed)
-# COPY init.sql /docker-entrypoint-initdb.d/
-
-# Expose the PostgreSQL port
+# Expose PostgreSQL port
 EXPOSE 5432
 
-# Start PostgreSQL service
-CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+# Run the PostgreSQL server
+CMD ["postgres"]
