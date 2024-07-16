@@ -18,18 +18,18 @@ volumes:
 
 services:
 
-  database:
-    build:
-     context: ./requirements/database
-     dockerfile: Dockerfile
-    container_name: tr-database
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - transcendence
-    volumes:
-      - db:/var/lib/postgresql/data
+  # database:
+  #   build:
+  #    context: ./requirements/database
+  #    dockerfile: Dockerfile
+  #   container_name: tr-database
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
+  #   networks:
+  #     - transcendence
+  #   volumes:
+  #     - db:/var/lib/postgresql/data
 
   backend:
     build:
