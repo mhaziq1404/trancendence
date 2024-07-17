@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enter Verification Code</title>
+</head>
+<body>
+    <h2>Enter Verification Code</h2>
+    <form id="verificationForm">
+        <label for="code">Verification Code:</label><br>
+        <input type="text" id="code" name="code"><br><br>
+        <button type="submit">Verify</button>
+    </form>
+
+    <div id="verificationResult" style="display: none; margin-top: 10px;">
+        <!-- Result message will be displayed here -->
+    </div>
+
+    <script>
+        const verificationForm = document.getElementById('verificationForm');
+        const verificationResult = document.getElementById('verificationResult');
+
+        verificationForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const code = document.getElementById('code').value;
+
+            fetch('/verify-2fa/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    verificationResult.innerHTML = `<p style="color: green;">${data.message}</p>`;
+                } else {
+                    verificationResult.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                }
+                verificationResult.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error verifying code:', error);
+                verificationResult.innerHTML = `<p style="color: red;">Error verifying code</p>`;
+                verificationResult.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

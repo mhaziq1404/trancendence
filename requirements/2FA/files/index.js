@@ -1,60 +1,65 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const speakeasy = require('speakeasy');
+const qrcode = require('qrcode');
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const app = express();
-const port = 3001;
-
 app.use(bodyParser.json());
 
-// Configure your email transport
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'your-email@gmail.com',
-    pass: 'your-email-password'
-  }
-});
-
-// Generate a 2FA secret
+// Endpoint to generate a secret and QR code
 app.post('/generate-secret', (req, res) => {
-  const secret = speakeasy.generateSecret({ length: 20 });
-  res.json({ secret: secret.base32 });
+    const secret = speakeasy.generateSecret({ length: 20 });
+    qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
+        res.json({ secret: secret.base32, qr_code: data_url });
+    });
 });
 
-// Verify a 2FA token
+// Endpoint to verify the token
 app.post('/verify-token', (req, res) => {
-  const { token, secret } = req.body;
-  const verified = speakeasy.totp.verify({
-    secret: secret,
-    encoding: 'base32',
-    token: token
-  });
-  res.json({ verified });
+    const { token, secret } = req.body;
+    const verified = speakeasy.totp.verify({
+        secret: secret,
+        encoding: 'base32',
+        token: token
+    });
+
+    res.json({ verified });
 });
 
-// Send a 2FA token via email
-app.post('/send-token', (req, res) => {
-  const { email, secret } = req.body;
-  const token = speakeasy.totp({ secret: secret, encoding: 'base32' });
+// Endpoint to send email with verification code
+app.post('/send-email', async (req, res) => {
+    const { email } = req.body;
+    const token = speakeasy.totp({
+        secret: process.env.EMAIL_SECRET,
+        encoding: 'base32'
+    });
 
-  const mailOptions = {
-    from: 'your-email@gmail.com',
-    to: email,
-    subject: 'Your 2FA Code',
-    text: `Your 2FA code is ${token}`
-  };
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return res.status(500).json({ error });
+    let mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your Verification Code',
+        text: `Your verification code is ${token}`
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        res.json({ message: 'Verification code sent' });
+    } catch (error) {
+        res.status(500).json({ error: error.toString() });
     }
-    res.json({ message: 'Token sent' });
-  });
 });
 
-app.listen(port, () => {
-  console.log(`2FA server listening at http://localhost:${port}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
-

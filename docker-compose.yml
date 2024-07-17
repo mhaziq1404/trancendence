@@ -118,8 +118,8 @@ services:
       context: ./requirements/2FA
       dockerfile: Dockerfile
     container_name: tr-2FA
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     networks:
       - transcendence
     restart: unless-stopped

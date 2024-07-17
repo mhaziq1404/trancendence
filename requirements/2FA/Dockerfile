@@ -14,7 +14,7 @@ EXPOSE 8080
 WORKDIR ./web
 
 RUN npm init -y
-RUN npm install express speakeasy body-parser nodemailer
+RUN npm install express body-parser speakeasy qrcode nodemailer dotenv
 
 COPY files/* .
 
