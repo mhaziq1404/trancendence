@@ -1,20 +1,26 @@
 FROM debian:bookworm-slim
 
-# Update and install necessary packages
-RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    software-properties-common \
-    lsb-release \
-    gnupg
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y python3 python3-venv python3-pip curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Add Ethereum repository and install Ethereum
-RUN curl -fsSL https://gethstore.blob.core.windows.net/builds/ethereum-go-linux-arm64-1.10.16-ffea7d24.tar.gz | tar -xzv \
-    && mv ethereum-go-linux-arm64-1.10.16-ffea7d24/geth /usr/local/bin/ \
-    && rm -rf ethereum-go-linux-arm64-1.10.16-ffea7d24
+# Set the working directory
+WORKDIR /app
 
-# Expose necessary ports for Ethereum
-EXPOSE 8545 8546 30303
+# Copy the requirements file and install dependencies
+COPY requirements.txt .
+RUN python3 -m venv venv && \
+    . venv/bin/activate && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Run the Ethereum node
-CMD ["geth", "--http", "--http.addr", "0.0.0.0", "--http.port", "8545", "--http.api", "eth,net,web3,personal"]
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port
+EXPOSE 5000
+
+# Run the application
+CMD [ "python3", "server.py" ]
+

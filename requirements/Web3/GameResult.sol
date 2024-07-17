@@ -2,28 +2,20 @@
 pragma solidity ^0.8.0;
 
 contract GameResults {
-    struct Game {
-        address player;
-        uint score;
-        uint timestamp;
+    struct Result {
+        string player;
+        uint256 score;
     }
 
-    Game[] public games;
+    Result[] public results;
 
-    event GameResultStored(address indexed player, uint score, uint indexed timestamp);
-
-    function storeGameResult(uint _score) public {
-        Game memory newGame = Game(msg.sender, _score, block.timestamp);
-        games.push(newGame);
-        emit GameResultStored(msg.sender, _score, block.timestamp);
+    function storeResult(string memory player, uint256 score) public {
+        results.push(Result(player, score));
     }
 
-    function getGameCount() public view returns (uint) {
-        return games.length;
-    }
-
-    function getGame(uint _index) public view returns (address player, uint score, uint timestamp) {
-        Game storage game = games[_index];
-        return (game.player, game.score, game.timestamp);
+    function getResult(uint256 index) public view returns (string memory player, uint256 score) {
+        Result memory result = results[index];
+        return (result.player, result.score);
     }
 }
+

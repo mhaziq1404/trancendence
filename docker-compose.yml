@@ -41,6 +41,22 @@ services:
     restart: unless-stopped
     networks:
       - transcendence
+    ports:
+      - "8000:8000"
+
+  # pong-eth-server:
+  #   build:
+  #    context: ./requirements/Web3
+  #    dockerfile: Dockerfile
+  #   container_name: tr-web3
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     INFURA_PROJECT_ID: your_infura_project_id
+  #     ACCOUNT_ADDRESS: your_test_account_address
+  #     PRIVATE_KEY: your_test_account_private_key
+  #     CONTRACT_ADDRESS: your_contract_address
+  #     CONTRACT_ABI: '[your_contract_abi_here]'
 
   # nginx:
   #     build:
